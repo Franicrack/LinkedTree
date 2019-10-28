@@ -159,7 +159,10 @@ public class LCRSTree<E> implements NAryTree<E> {
 
     @Override
     public Position<E> add(E element, Position<E> p) {
-        throw new RuntimeException("Not yet implemented");
+        LCRSNode<E> node= checkPosition(p);
+        LCRSNode<E> newNode= new LCRSNode<>(this,element,node,null,node.getLeft());
+        node.setLeft(newNode);
+        return newNode;
     }
 
     @Override
@@ -169,6 +172,54 @@ public class LCRSTree<E> implements NAryTree<E> {
 
     @Override
     public void moveSubtree(Position<E> pOrig, Position<E> pDest) throws RuntimeException {
-        throw new RuntimeException("Not yet implemented");
+        LCRSNode<E>node= checkPosition(pOrig);
+        List<Position<E>> aux= new ArrayList<>();
+        LCRSNode<E> nodeDest= checkPosition(pDest);
+        if (node==this.root)
+            throw new RuntimeException("Cant move the root");
+        if (pOrig==pDest)
+            throw new RuntimeException("pOrig = pDest");
+        BFSIterator<E> it= new BFSIterator(this,pOrig);
+        while(it.hasNext()){
+            aux.add(it.next());
+        }
+        int i;
+        boolean equals;
+        i=0;
+        equals= false;
+        while ((i<=aux.size())&& (equals==false)){
+            LCRSNode<E>aux2= checkPosition(aux.get(i));
+            if (nodeDest==aux2)
+                equals=true;
+        }
+        if (equals==true)
+            throw new RuntimeException("Dest node is inside of pOrig subtree");
+        LCRSNode<E> parent= node.getParent();
+        LCRSNode<E> aux2=parent.getLeft();
+        LCRSNode<E>aux3=null;
+        boolean same=false;
+        while((same==false)&&(aux2!=null)){
+            if (aux2!=node){
+                aux3=aux2;
+                aux2=aux2.getRight();
+            }
+            else
+                same=true;
+        }
+        if (same==true){
+            if ((aux3==null)&&(aux2.getRight()!=null)){
+                parent.setLeft(aux2.getRight());
+            }
+            else if((aux3==null)&&(aux2.getRight()==null)){
+                parent.setLeft(null);
+            }
+            else{
+                aux3.setRight(aux2.getRight());
+            }
+        }
+        aux2.setParent(nodeDest);
+        aux2.setRight(nodeDest.getLeft());
+        nodeDest.setLeft(aux2);
     }
 }
+

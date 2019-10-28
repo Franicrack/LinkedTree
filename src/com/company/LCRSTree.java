@@ -140,12 +140,15 @@ public class LCRSTree<E> implements NAryTree<E> {
 
     @Override
     public Iterator<Position<E>> iterator() {
-        throw new RuntimeException("Not yet implemented");
+        return new BFSIterator<>(this);
     }
 
     @Override
     public E replace(Position<E> p, E e) {
-        throw new RuntimeException("Not yet implemented");
+        LCRSNode<E> node = checkPosition(p);
+        E temp = p.getElement();
+        node.setElement(e);
+        return temp;
     }
 
     @Override
@@ -167,7 +170,42 @@ public class LCRSTree<E> implements NAryTree<E> {
 
     @Override
     public void remove(Position<E> p) {
-        throw new RuntimeException("Not yet implemented");
+        LCRSNode<E>node=checkPosition(p);
+        if(isRoot(node)){
+            this.root=null;
+            size=0;
+        }
+        else {
+            LCRSNode<E> parent = node.getParent();
+            BFSIterator<E> it = new BFSIterator<>(this, p);
+            int contador = 0;
+            while (it.hasNext()) {
+                LCRSNode<E> nodewhile = checkPosition(it.next());
+                nodewhile.setMyTree(null);
+                contador++;
+            }
+            node.setMyTree(null);
+            LCRSNode<E> aux2 = parent.getLeft();
+            LCRSNode<E> aux3 = null;
+            boolean same = false;
+            while ((same == false) && (aux2 != null)) {
+                if (aux2 != node) {
+                    aux3 = aux2;
+                    aux2 = aux2.getRight();
+                } else
+                    same = true;
+            }
+            if (same == true) {
+                if ((aux3 == null) && (aux2.getRight() != null)) {
+                    parent.setLeft(aux2.getRight());
+                } else if ((aux3 == null) && (aux2.getRight() == null)) {
+                    parent.setLeft(null);
+                } else {
+                    aux3.setRight(aux2.getRight());
+                }
+            }
+            size -= contador;
+        }
     }
 
     @Override

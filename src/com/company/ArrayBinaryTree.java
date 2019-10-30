@@ -8,24 +8,29 @@ import java.util.List;
 public class ArrayBinaryTree<E> implements BinaryTree<E> {
     private class ArrayBinaryNode<E> implements Position<E>{
         private E element;
-        private ArrayBinaryNode<E> left,right,parent;
+        private Integer pos,left,right,parent;
 
-        public ArrayBinaryNode(E element,ArrayBinaryNode left,ArrayBinaryNode right,ArrayBinaryNode parent){
+        public ArrayBinaryNode(E element,Integer pos,Integer left,Integer right,Integer parent){
             this.element=element;
+            this.pos=pos;
             this.left=left;
             this.right=right;
             this.parent=parent;
         }
 
-        public void setRight(ArrayBinaryNode<E> right) {
+        public void setPos(Integer pos) {
+            this.pos = pos;
+        }
+
+        public void setRight(Integer right) {
             this.right = right;
         }
 
-        public void setParent(ArrayBinaryNode<E> parent) {
+        public void setParent(Integer parent) {
             this.parent = parent;
         }
 
-        public void setLeft(ArrayBinaryNode<E> left) {
+        public void setLeft(Integer left) {
             this.left = left;
         }
 
@@ -38,32 +43,39 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
             return element;
         }
 
-        public ArrayBinaryNode<E> getLeft() {
+        public Integer getLeft() {
             return left;
         }
 
-        public ArrayBinaryNode<E> getParent() {
+        public Integer getParent() {
             return parent;
         }
 
-        public ArrayBinaryNode<E> getRight() {
+        public Integer getRight() {
             return right;
+        }
+
+        public Integer getPos(){
+            return pos;
         }
     }
 
     private int size;
     private ArrayBinaryNode<E> root;
+    private ArrayList<ArrayBinaryNode<E>> nodeArray;
 
     @Override
     public Position<E> left(Position<E> v) throws RuntimeException {
         ArrayBinaryNode<E>node= checkPosition(v);
-        return node.getLeft();
+        Integer i=node.getLeft();
+        return this.nodeArray.get(i);
     }
 
     @Override
     public Position<E> right(Position<E> v) throws RuntimeException {
         ArrayBinaryNode<E>node= checkPosition(v);
-        return node.getRight();
+        Integer i=node.getRight();
+        return this.nodeArray.get(i);
     }
 
     @Override
@@ -95,17 +107,19 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
     @Override
     public Position<E> sibling(Position<E> p) throws RuntimeException {
         ArrayBinaryNode<E>node= checkPosition(p);
-        ArrayBinaryNode<E> parentPos = node.getParent();
-        if (parentPos != null) {
-            ArrayBinaryNode<E> sibPos;
-            ArrayBinaryNode<E> leftPos = parentPos.getLeft();
-            if (leftPos == node) {
-                sibPos = parentPos.getRight();
+        Integer parentPos = node.getParent();
+        ArrayBinaryNode<E>parentNode=this.nodeArray.get(parentPos);
+        if (parentNode != null) {
+            Integer sibPos;
+            Integer leftPos = parentNode.getLeft();
+            if (this.nodeArray.get(leftPos) == node) {
+                sibPos = parentNode.getRight();
             } else {
-                sibPos = parentPos.getLeft();
+                sibPos = parentNode.getLeft();
             }
             if (sibPos != null) {
-                return sibPos;
+                ArrayBinaryNode<E>sibNode=this.nodeArray.get(sibPos);
+                return sibNode;
             }
         }
         throw new RuntimeException("No sibling");
@@ -114,24 +128,24 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
     @Override
     public Position<E> insertLeft(Position<E> p, E e) throws RuntimeException {
         ArrayBinaryNode<E> node = checkPosition(p);
-        Position<E> leftPos = node.getLeft();
+        Integer leftPos = node.getLeft();
         if (leftPos != null) {
             throw new RuntimeException("Node already has a left child");
         }
-        ArrayBinaryNode<E> newNode = new ArrayBinaryNode<>(e, null, null, node);
-        node.setLeft(newNode);
+        ArrayBinaryNode<E> newNode = new ArrayBinaryNode<>(e, leftPos, null, null,node.pos);
+        node.setLeft(newNode.pos);
         return newNode;
     }
 
     @Override
     public Position<E> insertRight(Position<E> p, E e) throws RuntimeException {
         ArrayBinaryNode<E> node = checkPosition(p);
-        Position<E> rightPos = node.getRight();
+        Integer rightPos = node.getRight();
         if (rightPos != null) {
             throw new RuntimeException("Node already has a right child");
         }
-        ArrayBinaryNode<E> newNode = new ArrayBinaryNode<>(e, null, null, node);
-        node.setRight(newNode);
+        ArrayBinaryNode<E> newNode = new ArrayBinaryNode<>(e, null, null, null,node.pos);
+        node.setRight(newNode.pos);
         return newNode;
     }
 
@@ -180,7 +194,8 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
     @Override
     public Position<E> parent(Position<E> v) throws RuntimeException {
         ArrayBinaryNode<E> node = checkPosition(v);
-        return node.getParent();
+        Integer parentPos= node.getParent();
+        return this.nodeArray.get(parentPos);
     }
     private ArrayBinaryNode<E> checkPosition(Position<E> p) {
         if (p == null || !(p instanceof ArrayBinaryNode)) {
@@ -228,7 +243,7 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
         if (!isEmpty()) {
             throw new RuntimeException("Tree already has a root");
         }
-        this.root = new ArrayBinaryNode<>(e, null, null, null);
+        this.root = new ArrayBinaryNode<>(e, this.root.pos, null, null, null);
         return this.root;
     }
 

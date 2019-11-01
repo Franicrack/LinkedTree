@@ -447,6 +447,6 @@ public class ArrayBinaryTree<E> implements BinaryTree<E> {
 
     @Override
     public Iterator<Position<E>> iterator() {
-        return null;
+        return new InorderBinaryTreeIterator<>(this);
     }
 }
